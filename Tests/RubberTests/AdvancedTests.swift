@@ -129,10 +129,10 @@ struct AdvancedRubberBandTests {
         let result = rubberBand(value: 200.0, min: min, max: max, config: config)
         #expect(result > max)
 
-        // Low response should create less resistance (less displacement from boundary)
+        // Low response should create less resistance (more displacement from boundary)
         let normalConfig = RubberBandConfig.smooth
         let normalResult = rubberBand(value: 200.0, min: min, max: max, config: normalConfig)
-        #expect(result < normalResult) // Low response creates less displacement
+        #expect(result > normalResult) // Low response creates more displacement
     }
 
     @Test("Edge case: Very high response")
@@ -144,10 +144,10 @@ struct AdvancedRubberBandTests {
         let result = rubberBand(value: 150.0, min: min, max: max, config: config)
         #expect(result > max)
 
-        // High response should create stronger resistance (more displacement from boundary)
+        // High response should create stronger resistance (less displacement from boundary)
         let normalConfig = RubberBandConfig.smooth
         let normalResult = rubberBand(value: 150.0, min: min, max: max, config: normalConfig)
-        #expect(result > normalResult) // High response creates more displacement
+        #expect(result < normalResult) // High response creates less displacement
     }
 
     // MARK: - Spring Physics Tests

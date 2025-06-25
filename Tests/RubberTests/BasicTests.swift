@@ -205,4 +205,28 @@ struct RubberBandTests {
         // Test that elastic has the lowest damping
         #expect(RubberBandConfig.elastic.dampingFraction < RubberBandConfig.bouncy.dampingFraction)
     }
+
+    @Test("Edge case: Very large values outside range should be bounded")
+    func veryLargeValuesOutsideRange() {
+        let min = -10.0
+        let max = 10.0
+        let config = RubberBandConfig.smooth
+
+        // Test very large positive value
+        let largePositive = 200.rubber(min ... max, config)
+        #expect(largePositive > max, "Result should be above max")
+        #expect(largePositive < max + 200.0, "Result should be bounded, not unlimited")
+        #expect(largePositive == 53.87550200803212)
+
+        // Test very large negative value
+        let largeNegative = (-200.0).rubber(min ... max, config)
+
+        #expect(largeNegative < min, "Result should be below min")
+        #expect(largeNegative > min - 200.0, "Result should be bounded, not unlimited")
+        #expect(largeNegative == -53.87550200803212)
+
+        // The current implementation likely fails these bounds checks
+        print("Large positive (200 -> range -10...10): \(largePositive)")
+        print("Large negative (-200 -> range -10...10): \(largeNegative)")
+    }
 }

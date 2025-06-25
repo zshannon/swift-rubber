@@ -109,16 +109,28 @@ private func calculateResistance(distance: Double, config: RubberBandConfig) -> 
     let stiffness = config.response
     let damping = config.dampingFraction
 
+    // Use asymptotic function that ensures monotonicity and aggressive bounding
+    let maxDisplacement = 25.0 + (15.0 / stiffness)
+
+    // Asymptotic function: approaches maxDisplacement but never exceeds it
+    let normalizedDistance = distance / (distance + 20.0 / stiffness)
+    let baseResistance = maxDisplacement * normalizedDistance
+
+    // Apply spring characteristics as multiplicative factors
+    let springFactor: Double
     if damping < 1.0 {
-        // Underdamped - bouncy spring with oscillatory character
+        // Underdamped - slight oscillatory character that preserves monotonicity
         let frequency = sqrt(1 - damping * damping)
-        return distance * (1 - exp(-stiffness * distance) * cos(frequency * stiffness * distance))
+        let oscillation = 0.1 * sin(frequency * distance / 10.0) * exp(-distance / 50.0)
+        springFactor = 1.0 + oscillation
     } else if damping == 1.0 {
-        // Critically damped - smooth exponential approach
-        return distance * (1 - exp(-stiffness * distance))
+        // Critically damped - pure asymptotic behavior
+        springFactor = 1.0
     } else {
-        // Overdamped - sluggish, viscous feel
-        let beta = damping - 1.0
-        return distance * (1 - exp(-stiffness * distance) * (1 + beta * stiffness * distance))
+        // Overdamped - slightly reduced response
+        let dampingReduction = 1.0 - 0.15 * (damping - 1.0) / (damping + 1.0)
+        springFactor = dampingReduction
     }
+
+    return baseResistance * springFactor
 }
